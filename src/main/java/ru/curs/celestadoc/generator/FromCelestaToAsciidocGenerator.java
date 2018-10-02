@@ -141,7 +141,7 @@ public class FromCelestaToAsciidocGenerator implements AutoCloseable{
         for (String docLine : celestaDoc.split("\\r?\\n")) {
             Matcher matcher = pattern.matcher(docLine.trim());
             if (matcher.find()) {
-                return matcher.group(2);
+                return matcher.group(2).trim();
             }
         }
         return "";
