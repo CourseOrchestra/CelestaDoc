@@ -16,6 +16,7 @@ public class FromCelestaToAsciidocGenerator implements AutoCloseable{
     private final ResourceBundle header = ResourceBundle.getBundle("header", new XMLResourceBundleControl());
     private final ResourceBundle scheme = ResourceBundle.getBundle("scheme", new XMLResourceBundleControl());
     private final ResourceBundle table = ResourceBundle.getBundle("table", new XMLResourceBundleControl());
+    private final ResourceBundle fkeyTable = ResourceBundle.getBundle("fkey_table", new XMLResourceBundleControl());
     private final String regex = "(%s:)(.+)$";
 
     private final Pattern pattern;
@@ -48,10 +49,10 @@ public class FromCelestaToAsciidocGenerator implements AutoCloseable{
             Map<Table, List<ForeignKey>> tableForeignKeyMap = getForeignKeys(tableMap);
             for (Map.Entry<String, Table> tableEntry : tableMap.entrySet()) {
                 String tableName = tableEntry.getKey();
-                String celestaIdentifier = String.format("celestareporter_t_%s_%s", schemeName, tableName);
+                String celestaTableIdentifier = String.format("celestareporter_t_%s_%s", schemeName, tableName);
 
                 writer.write(String.format(
-                        table.getString("tableName"), celestaIdentifier, tableName, celestaIdentifier));
+                        table.getString("tableName"), celestaTableIdentifier, tableName, celestaTableIdentifier));
                 writer.newLine();
 
                 writer.write(table.getString("table"));
@@ -61,6 +62,9 @@ public class FromCelestaToAsciidocGenerator implements AutoCloseable{
                 Set<ForeignKey> foreignKeys = tableEntry.getValue().getForeignKeys();
                 for (Map.Entry<String, Column> columnEntry : columnMap.entrySet()) {
                     String field = columnEntry.getKey();
+                    if (tableEntry.getValue().getPrimaryKey().containsKey(field)) {
+                        field += table.getString("keyIcon");
+                    }
                     Column column = columnEntry.getValue();
 
                     String specification = getSpecification(column);
@@ -86,7 +90,19 @@ public class FromCelestaToAsciidocGenerator implements AutoCloseable{
                     writer.newLine();
                 }
 
-                writer.write(String.format(table.getString("tableSectionEnd"), celestaIdentifier));
+                if (!foreignKeys.isEmpty()) {
+                    writer.write(String.format(
+                            fkeyTable.getString("fkeyTable"), celestaTableIdentifier));
+                    writer.newLine();
+                    for (ForeignKey fk : foreignKeys) {
+
+                    }
+                    writer.write(String.format(
+                            fkeyTable.getString("fkeyEnd"), celestaTableIdentifier));
+                    writer.newLine();
+                }
+
+                writer.write(String.format(table.getString("tableSectionEnd"), celestaTableIdentifier));
                 writer.newLine();
 
             }

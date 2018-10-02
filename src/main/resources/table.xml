@@ -14,9 +14,7 @@
     <entry key="row">
 |%s |%s |%s
     </entry>
-    <entry key="keyIcon">
-{key-icon}
-    </entry>
+    <entry key="keyIcon">{key-icon}</entry>
     <entry key="tableEnd">
 |====
     </entry>
