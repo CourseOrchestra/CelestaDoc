@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>ru.curs</groupId>
+    <artifactId>CelestaDoc</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
+
+    <name>CelestaDoc</name>
+    <description>CelestaDoc generates asciidoc format report from celesta metadata</description>
+    <url>https://github.com/CourseOrchestra/celestadoc</url>
+
+    <organization>
+        <name>CURS</name>
+        <url>https://corchestra.ru</url>
+    </organization>
+
+    <scm>
+        <url>https://github.com/CourseOrchestra/celestadoc.git</url>
+    </scm>
+
+    <licenses>
+        <license>
+            <name>GNU General Public License (GPL), Version 3</name>
+            <url>https://www.gnu.org/licenses/gpl.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <name>Vladimir Kurov</name>
+            <email>vaambival@gmail.com</email>
+        </developer>
+    </developers>
+
+    <contributors>
+        <contributor>
+            <name>Ivan Ponomarev</name>
+            <email>ponomarev@corchestra.ru</email>
+        </contributor>
+    </contributors>
+
+    <properties>
+        <java.version>1.8</java.version>
+        <encoding>utf-8</encoding>
+
+        <asciidoctor.pdf.version>1.5.0-alpha.11</asciidoctor.pdf.version>
+        <asciidoctorj.version>1.5.6</asciidoctorj.version>
+        <celesta.version>6.1.7</celesta.version>
+
+        <maven.assembly.plugin.version>3.1.0</maven.assembly.plugin.version>
+        <maven.compiler.plugin.version>3.3</maven.compiler.plugin.version>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>ru.curs</groupId>
+            <artifactId>celesta-parent</artifactId>
+            <version>${celesta.version}</version>
+            <type>pom</type>
+            <scope>import</scope>
+        </dependency>
+        <dependency>
+            <groupId>ru.curs</groupId>
+            <artifactId>celesta-sql</artifactId>
+            <version>${celesta.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>ru.curs</groupId>
+            <artifactId>celesta-java</artifactId>
+            <version>${celesta.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.asciidoctor</groupId>
+            <artifactId>asciidoctorj</artifactId>
+            <version>${asciidoctorj.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.asciidoctor</groupId>
+            <artifactId>asciidoctorj-pdf</artifactId>
+            <version>${asciidoctor.pdf.version}</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${maven.compiler.plugin.version}</version>
+                <configuration>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
+                    <encoding>${encoding}</encoding>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>${maven.assembly.plugin.version}</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <descriptors>
+                        <descriptor>src/main/assembly/bin.xml</descriptor>
+                    </descriptors>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

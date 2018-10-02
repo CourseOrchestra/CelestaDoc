@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+    <entry key="tableName">[[%s]]
+[discrete]
+=== {table} %s
+//tag::%s[]
+    </entry>
+    <entry key="table">
+[options="header"]
+|====
+^.^|{field} ^.^|{specification} ^.^|{description}
+    </entry>
+    <entry key="row">
+|%s |%s |%s
+    </entry>
+    <entry key="keyIcon">
+{key-icon}
+    </entry>
+    <entry key="tableEnd">
+|====
+    </entry>
+
+    <entry key="isReference">
+//tag::is_referenced[]
+[discrete]
+==== {is-referenced}
+    </entry>
+
+    <entry key="referencedTable">
+* &lt;&lt;%s&gt;&gt;
+    </entry>
+
+    <entry key="isReferenceEnd">
+//end::is_referenced[]
+//end::%s[]
+    </entry>
+</properties>

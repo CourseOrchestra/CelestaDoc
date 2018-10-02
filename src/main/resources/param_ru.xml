@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+    <entry key="params">:scheme: Схема
+:table: Таблица
+:field: Поле
+:key: Ключевое поле
+:specification: Спецификация
+:description: Описание
+:key-icon: {nbsp}icon:key[]
+:foreign-keys: Внешние ключи
+:is-referenced: Ссылки на таблицу</entry>
+</properties>
