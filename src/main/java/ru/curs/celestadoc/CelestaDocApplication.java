@@ -47,11 +47,11 @@ public class CelestaDocApplication {
             e.printStackTrace();
         }
 
-        try {
-            AsciidocConverter.convert("report.adoc");
-        } catch (RuntimeException exc) {
-            System.out.println(exc.getMessage());
-        }
+//        try {
+//            AsciidocConverter.convert("report.adoc");
+//        } catch (RuntimeException exc) {
+//            System.out.println(exc.getMessage());
+//        }
     }
 
     private static void help() {

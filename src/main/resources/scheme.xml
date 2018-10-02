@@ -6,4 +6,7 @@
 [discrete]
 == {scheme} %s
     </entry>
+    <entry key="schemeEnd">
+//end::generated_from_celesta_sql[]
+    </entry>
 </properties>

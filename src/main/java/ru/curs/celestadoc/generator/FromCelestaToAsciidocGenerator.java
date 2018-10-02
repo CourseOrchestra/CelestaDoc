@@ -8,9 +8,7 @@ import ru.curs.celestadoc.reader.CelestaSqlReader;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Map;
-import java.util.ResourceBundle;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -47,6 +45,7 @@ public class FromCelestaToAsciidocGenerator implements AutoCloseable{
             writer.newLine();
 
             Map<String, Table> tableMap = entry.getValue().getTables();
+            Map<Table, List<ForeignKey>> tableForeignKeyMap = getForeignKeys(tableMap);
             for (Map.Entry<String, Table> tableEntry : tableMap.entrySet()) {
                 String tableName = tableEntry.getKey();
                 String celestaIdentifier = String.format("celestareporter_t_%s_%s", schemeName, tableName);
@@ -72,20 +71,58 @@ public class FromCelestaToAsciidocGenerator implements AutoCloseable{
                 writer.write(table.getString("tableEnd"));
                 writer.newLine();
 
-                Set<ForeignKey> setFK = tableEntry.getValue().getForeignKeys();
-                if (!setFK.isEmpty()) {
+                if (tableForeignKeyMap.containsKey(tableEntry.getValue())) {
                     writer.write(table.getString("isReference"));
                     writer.newLine();
-                    for (ForeignKey fk : setFK) {
+                    for (ForeignKey fk : tableForeignKeyMap.get(tableEntry.getValue())) {
                         String referencedCelestaIdentifier =
-                                String.format("celestareporter_t_%s_%s", schemeName, fk.getReferencedTable().getName());
+                                String.format("celestareporter_t_%s_%s", schemeName, fk.getParentTable().getName());
                         writer.write(String.format(
                                 table.getString("referencedTable"), referencedCelestaIdentifier));
                         writer.newLine();
                     }
+                    writer.write(table.getString("isReferenceEnd"));
+                    writer.newLine();
+                }
+
+                writer.write(String.format(table.getString("tableSectionEnd"), celestaIdentifier));
+                writer.newLine();
+
+//                Set<ForeignKey> setFK = tableEntry.getValue().getForeignKeys();
+//                if (!setFK.isEmpty()) {
+//                    writer.write(table.getString("isReference"));
+//                    writer.newLine();
+//                    for (ForeignKey fk : setFK) {
+//                        String referencedCelestaIdentifier =
+//                                String.format("celestareporter_t_%s_%s", schemeName, fk.getReferencedTable().getName());
+//                        writer.write(String.format(
+//                                table.getString("referencedTable"), referencedCelestaIdentifier));
+//                        writer.newLine();
+//                    }
+//                }
+            }
+            writer.write(scheme.getString("schemeEnd"));
+            writer.newLine();
+        }
+    }
+
+    private Map<Table, List<ForeignKey>> getForeignKeys(Map<String, Table> tableMap) {
+        Map<Table, List<ForeignKey>> result = new HashMap<>();
+        for (Map.Entry<String, Table> entry : tableMap.entrySet()) {
+            Table table = entry.getValue();
+            for (ForeignKey fk : table.getForeignKeys()) {
+                if (result.containsKey(fk.getReferencedTable())) {
+                    result.get(fk.getReferencedTable()).add(fk);
+                } else {
+                    List<ForeignKey> foreignKeys = new ArrayList<>();
+                    foreignKeys.add(fk);
+                    result.put(fk.getReferencedTable(), foreignKeys);
+
                 }
             }
         }
+
+        return result;
     }
 
     private String getSpecification(Column column) {

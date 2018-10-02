@@ -33,6 +33,9 @@
 
     <entry key="isReferenceEnd">
 //end::is_referenced[]
+    </entry>
+
+    <entry key="tableSectionEnd">
 //end::%s[]
     </entry>
 </properties>
