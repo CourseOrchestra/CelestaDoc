@@ -58,6 +58,7 @@ public class FromCelestaToAsciidocGenerator implements AutoCloseable{
                 writer.newLine();
 
                 Map<String, Column> columnMap = tableEntry.getValue().getColumns();
+                Set<ForeignKey> foreignKeys = tableEntry.getValue().getForeignKeys();
                 for (Map.Entry<String, Column> columnEntry : columnMap.entrySet()) {
                     String field = columnEntry.getKey();
                     Column column = columnEntry.getValue();
@@ -88,22 +89,29 @@ public class FromCelestaToAsciidocGenerator implements AutoCloseable{
                 writer.write(String.format(table.getString("tableSectionEnd"), celestaIdentifier));
                 writer.newLine();
 
-//                Set<ForeignKey> setFK = tableEntry.getValue().getForeignKeys();
-//                if (!setFK.isEmpty()) {
-//                    writer.write(table.getString("isReference"));
-//                    writer.newLine();
-//                    for (ForeignKey fk : setFK) {
-//                        String referencedCelestaIdentifier =
-//                                String.format("celestareporter_t_%s_%s", schemeName, fk.getReferencedTable().getName());
-//                        writer.write(String.format(
-//                                table.getString("referencedTable"), referencedCelestaIdentifier));
-//                        writer.newLine();
-//                    }
-//                }
             }
             writer.write(scheme.getString("schemeEnd"));
             writer.newLine();
         }
+    }
+
+    @Override
+    public void close() throws Exception {
+        writer.close();
+    }
+
+    private String getDescription(String celestaDoc) {
+        if (celestaDoc == null) {
+            return "";
+        }
+
+        for (String docLine : celestaDoc.split("\\r?\\n")) {
+            Matcher matcher = pattern.matcher(docLine.trim());
+            if (matcher.find()) {
+                return matcher.group(2);
+            }
+        }
+        return "";
     }
 
     private Map<Table, List<ForeignKey>> getForeignKeys(Map<String, Table> tableMap) {
@@ -141,24 +149,5 @@ public class FromCelestaToAsciidocGenerator implements AutoCloseable{
             specification += String.format(" DEFAULT %s", column.getCelestaDefault());
         }
         return specification;
-    }
-
-    @Override
-    public void close() throws Exception {
-        writer.close();
-    }
-
-    private String getDescription(String celestaDoc) {
-        if (celestaDoc == null) {
-            return "";
-        }
-
-        for (String docLine : celestaDoc.split("\\r?\\n")) {
-            Matcher matcher = pattern.matcher(docLine.trim());
-            if (matcher.find()) {
-                return matcher.group(2);
-            }
-        }
-        return "";
     }
 }

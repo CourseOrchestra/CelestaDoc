@@ -4,8 +4,8 @@ import java.util.Arrays;
 import java.util.Locale;
 
 public enum LocaleDefinition {
-    DOCEN("doc-ru", Locale.ENGLISH),
-    DOCRU("doc-en", new Locale("ru"));
+    DOCEN("doc-en", Locale.ENGLISH),
+    DOCRU("doc-ru", new Locale("ru"));
 
     private Locale locale;
     private String value;
