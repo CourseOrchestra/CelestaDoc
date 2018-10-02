@@ -95,7 +95,22 @@ public class FromCelestaToAsciidocGenerator implements AutoCloseable{
                             fkeyTable.getString("fkeyTable"), celestaTableIdentifier));
                     writer.newLine();
                     for (ForeignKey fk : foreignKeys) {
+                        Set<String> fkeysNames = fk.getColumns().keySet();
+                        Set<String> pkeysNames = fk.getReferencedTable().getPrimaryKey().keySet();
 
+                        Iterator<String> fkeysNamesIterator = fkeysNames.iterator();
+                        Iterator<String> pkeysNamesIterator = pkeysNames.iterator();
+
+                        StringBuilder keyField = new StringBuilder();
+                        while (fkeysNamesIterator.hasNext() && pkeysNamesIterator.hasNext()) {
+                            keyField.append('*').append(fkeysNamesIterator.next())
+                                    .append('*').append(":").append(pkeysNamesIterator.next()).append('\n');
+                        }
+                        String referencedCelestaIdentifier =
+                                String.format("celestareporter_t_%s_%s", schemeName, fk.getReferencedTable().getName());
+
+                        writer.write(String.format(fkeyTable.getString("table"), keyField.toString(),
+                                referencedCelestaIdentifier, fk.getReferencedTable().getName()));
                     }
                     writer.write(String.format(
                             fkeyTable.getString("fkeyEnd"), celestaTableIdentifier));

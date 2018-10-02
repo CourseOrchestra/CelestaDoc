@@ -11,7 +11,7 @@
     </entry>
 
     <entry key="table">
-| *%s*: %s
+| %s
 |&lt;&lt;%s, %s&gt;&gt;
     </entry>
 

@@ -7,7 +7,7 @@
 //tag::%s[]
     </entry>
     <entry key="table">
-[options="header"]
+[cols="1,1,2", options="header"]
 |====
 ^.^|{field} ^.^|{specification} ^.^|{description}
     </entry>
