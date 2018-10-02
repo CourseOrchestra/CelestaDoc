@@ -5,6 +5,7 @@
 [discrete]
 === {table} %s
 //tag::%s[]
+%s
     </entry>
     <entry key="table">
 [cols="1,1,2", options="header"]

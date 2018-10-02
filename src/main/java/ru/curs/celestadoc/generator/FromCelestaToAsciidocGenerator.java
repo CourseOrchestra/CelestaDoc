@@ -50,9 +50,11 @@ public class FromCelestaToAsciidocGenerator implements AutoCloseable{
             for (Map.Entry<String, Table> tableEntry : tableMap.entrySet()) {
                 String tableName = tableEntry.getKey();
                 String celestaTableIdentifier = String.format("celestareporter_t_%s_%s", schemeName, tableName);
+                String tableDescription = getDescription(tableEntry.getValue().getCelestaDoc());
 
                 writer.write(String.format(
-                        table.getString("tableName"), celestaTableIdentifier, tableName, celestaTableIdentifier));
+                        table.getString("tableName"), celestaTableIdentifier, tableName, celestaTableIdentifier,
+                        tableDescription));
                 writer.newLine();
 
                 writer.write(table.getString("table"));
