@@ -1,13 +1,14 @@
 package ru.curs.celestadoc.generator;
 
 import ru.curs.celesta.score.*;
-import ru.curs.celestadoc.helper.LocaleDefinition;
 import ru.curs.celestadoc.helper.XMLResourceBundleControl;
 import ru.curs.celestadoc.reader.CelestaSqlReader;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -22,27 +23,24 @@ public class FromCelestaToAsciidocGenerator implements AutoCloseable{
     private final Pattern pattern;
     private final CelestaSqlReader celestaSqlReader;
     private final BufferedWriter writer;
-    private final ResourceBundle param;
 
-    public FromCelestaToAsciidocGenerator(String celestaPath, String outputPath, LocaleDefinition locale)
+    public FromCelestaToAsciidocGenerator(String celestaPath, String outputPath, String prefix)
             throws ParseException, IOException {
         celestaSqlReader = new CelestaSqlReader(celestaPath);
-        writer = new BufferedWriter(new FileWriter(outputPath));
-        pattern = Pattern.compile(String.format(regex, locale.getValue()));
-
-        param = ResourceBundle.getBundle("param", locale.getLocale(), new XMLResourceBundleControl());
+        writer = Files.newBufferedWriter(Paths.get(outputPath));
+        pattern = Pattern.compile(String.format(regex, prefix));
     }
 
     public void generate() throws IOException {
         writer.write(header.getString("header"));
         writer.newLine();
-        writer.write(param.getString("params"));
-        writer.newLine();
 
         Map<String, Grain> grains = celestaSqlReader.getGrains();
         for (Map.Entry<String, Grain> entry : grains.entrySet()) {
             String schemeName = entry.getKey();
-            writer.write(String.format(scheme.getString("scheme"), schemeName));
+            String schemeDoc = getDescription(entry.getValue().getCelestaDoc());
+
+            writer.write(String.format(scheme.getString("scheme"), schemeName, schemeDoc));
             writer.newLine();
 
             Map<String, Table> tableMap = entry.getValue().getTables();
@@ -84,8 +82,9 @@ public class FromCelestaToAsciidocGenerator implements AutoCloseable{
                     for (ForeignKey fk : tableForeignKeyMap.get(tableEntry.getValue())) {
                         String referencedCelestaIdentifier =
                                 String.format("celestareporter_t_%s_%s", schemeName, fk.getParentTable().getName());
+                        String schemeTableName = String.format("%s.%s", schemeName, fk.getParentTable().getName());
                         writer.write(String.format(
-                                table.getString("referencedTable"), referencedCelestaIdentifier));
+                                table.getString("referencedTable"), referencedCelestaIdentifier, schemeTableName));
                         writer.newLine();
                     }
                     writer.write(table.getString("isReferenceEnd"));
@@ -110,9 +109,10 @@ public class FromCelestaToAsciidocGenerator implements AutoCloseable{
                         }
                         String referencedCelestaIdentifier =
                                 String.format("celestareporter_t_%s_%s", schemeName, fk.getReferencedTable().getName());
+                        String schemeTableName = String.format("%s.%s", schemeName, fk.getParentTable().getName());
 
                         writer.write(String.format(fkeyTable.getString("table"), keyField.toString(),
-                                referencedCelestaIdentifier, fk.getReferencedTable().getName()));
+                                referencedCelestaIdentifier, schemeTableName));
                     }
                     writer.write(String.format(
                             fkeyTable.getString("fkeyEnd"), celestaTableIdentifier));

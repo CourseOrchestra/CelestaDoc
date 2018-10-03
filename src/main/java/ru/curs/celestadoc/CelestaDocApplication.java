@@ -2,18 +2,15 @@ package ru.curs.celestadoc;
 
 import ru.curs.celestadoc.generator.AsciidocConverter;
 import ru.curs.celestadoc.generator.FromCelestaToAsciidocGenerator;
-import ru.curs.celestadoc.helper.LocaleDefinition;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.stream.Collectors;
 
 import static ru.curs.celestadoc.validator.CommandLineArgumentValidator.ValidateException;
 import static ru.curs.celestadoc.validator.CommandLineArgumentValidator.validate;
 
 public class CelestaDocApplication {
     public static void main(String[] args) {
-        if (args.length != 2) {
+        if (args.length < 3) {
             help();
             System.exit(1);
         }
@@ -25,20 +22,12 @@ public class CelestaDocApplication {
         }
 
         String celestaPath = args[0];
-
-        LocaleDefinition definition = null;
-        try {
-            definition= LocaleDefinition.getLocaleDefinition(args[1]);
-        } catch (IllegalArgumentException exc) {
-            System.out.println(exc.getMessage());
-            System.out.println("You can use: " + Arrays.stream(LocaleDefinition.values())
-                                                        .map(LocaleDefinition::name)
-                                                        .collect(Collectors.joining(", ")));
-            System.exit(1);
-        }
+        String prefix = args[1];
+        String fileName = args[2];
+        boolean isPdf = args.length > 3 && args[3].equalsIgnoreCase("-pdf");
 
         try (FromCelestaToAsciidocGenerator generator =
-                     new FromCelestaToAsciidocGenerator(celestaPath, "report.adoc", definition)) {
+                     new FromCelestaToAsciidocGenerator(celestaPath, fileName, prefix)) {
             generator.generate();
         } catch (IOException e) {
             System.out.println(e.getMessage() + ": cannot create file for write asciidoc");
@@ -47,21 +36,25 @@ public class CelestaDocApplication {
             e.printStackTrace();
         }
 
-//        try {
-//            AsciidocConverter.convert("report.adoc");
-//        } catch (RuntimeException exc) {
-//            System.out.println(exc.getMessage());
-//        }
+        if (isPdf) {
+            try {
+                AsciidocConverter.convert(fileName);
+            } catch (RuntimeException exc) {
+                System.out.println(exc.getMessage());
+            }
+        }
     }
 
     private static void help() {
         System.out.println(helpMessage);
     }
 
-    private static final String helpMessage = "Please use the next command to run:\ncelestadoc C:/user/score/ docru\n" +
+    private static final String helpMessage = "Please use the next command to run:\ncelestadoc C:/user/score/ doc-ru " +
+            "report.adoc\n" +
             "where C:/user/score - path where celesta sql files are\n" +
             "      docru - argument for language of document. You can write comments in your celesta sql in format:\n" +
             "doc(locale): some_comment, for example: doc-ru: Комментарий\n" +
             "                                        doc-en: A comment\n" +
-            "                                        doc-fr: Le commentaire\n ";
+            "                                        doc-fr: Le commentaire\n " +
+            "Also you can use flag -pdf for converting asciidoc result to pdf format.\n";
 }

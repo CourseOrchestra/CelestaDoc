@@ -4,8 +4,8 @@
     <entry key="fkeyTable">
 [discrete]
 ==== {foreign-keys}
-//tag::fkey_%s[]
-[cols="1,1", options="header"]
+//tag::references[]
+[options="header", cols="{fkey-cols-spec}"]
 |====
 ^.^|{key} ^.^|{table}
     </entry>
@@ -17,6 +17,6 @@
 
     <entry key="fkeyEnd">
 |====
-//end::fkey_%s[]
+//end::references[]
     </entry>
 </properties>

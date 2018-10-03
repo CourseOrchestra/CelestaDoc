@@ -4,7 +4,10 @@
     <entry key="scheme">
 //tag::generated_from_celesta_sql[]
 [discrete]
-== {scheme} %s
+== {scheme} {openq}%s{closeq}
+//tag::scheme_comment[]
+%s
+//end::scheme_comment[]
     </entry>
     <entry key="schemeEnd">
 //end::generated_from_celesta_sql[]

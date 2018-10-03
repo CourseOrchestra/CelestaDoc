@@ -3,12 +3,12 @@
 <properties>
     <entry key="tableName">[[%s]]
 [discrete]
-=== {table} %s
+=== {table} {openq}%s{closeq}
 //tag::%s[]
 %s
     </entry>
     <entry key="table">
-[cols="1,1,2", options="header"]
+[options="header", cols="{cols-specs}"]
 |====
 ^.^|{field} ^.^|{specification} ^.^|{description}
     </entry>
@@ -27,7 +27,7 @@
     </entry>
 
     <entry key="referencedTable">
-* &lt;&lt;%s&gt;&gt;
+* &lt;&lt;%s,%s&gt;&gt;
     </entry>
 
     <entry key="isReferenceEnd">
