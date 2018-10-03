@@ -24,7 +24,14 @@ public class CelestaDocApplication {
         String celestaPath = args[0];
         String prefix = args[1];
         String fileName = args[2];
-        boolean isPdf = args.length > 3 && args[3].equalsIgnoreCase("-pdf");
+        boolean isPdf = args.length == 4 && args[3].equalsIgnoreCase("-pdf");
+        boolean isHtml = args.length == 4 && args[3].equalsIgnoreCase("-html");
+
+        if (args.length == 5) {
+            String options = (args[3] + args[4]).toLowerCase();
+            isPdf = options.contains("-pdf");
+            isHtml = options.contains("-html");
+        }
 
         try (FromCelestaToAsciidocGenerator generator =
                      new FromCelestaToAsciidocGenerator(celestaPath, fileName, prefix)) {
@@ -36,12 +43,15 @@ public class CelestaDocApplication {
             e.printStackTrace();
         }
 
-        if (isPdf) {
-            try {
-                AsciidocConverter.convert(fileName);
-            } catch (RuntimeException exc) {
-                System.out.println(exc.getMessage());
+        try {
+            if (isPdf) {
+                AsciidocConverter.convertToPdf(fileName);
             }
+            if (isHtml) {
+                AsciidocConverter.convertToHtml(fileName);
+            }
+        } catch (RuntimeException exc) {
+            System.out.println(exc.getMessage());
         }
     }
 
@@ -56,5 +66,5 @@ public class CelestaDocApplication {
             "doc(locale): some_comment, for example: doc-ru: Комментарий\n" +
             "                                        doc-en: A comment\n" +
             "                                        doc-fr: Le commentaire\n " +
-            "Also you can use flag -pdf for converting asciidoc result to pdf format.\n";
+            "Also you can use flag -pdf or(and) -html for converting asciidoc result to pdf format.\n";
 }
