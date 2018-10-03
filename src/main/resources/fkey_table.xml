@@ -2,12 +2,12 @@
 <!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
 <properties>
     <entry key="fkeyTable">
+//tag::references[]
 [discrete]
 ==== {foreign-keys}
-//tag::references[]
 [options="header", cols="{fkey-cols-spec}"]
 |====
-^.^|{key} ^.^|{table}
+^.^|{key} ^.^|{table-in-th}
     </entry>
 
     <entry key="table">

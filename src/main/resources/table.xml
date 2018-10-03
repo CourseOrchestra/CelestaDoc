@@ -8,7 +8,7 @@
 %s
     </entry>
     <entry key="table">
-[options="header", cols="{cols-specs}"]
+[options="header", cols="{field-cols-specs}"]
 |====
 ^.^|{field} ^.^|{specification} ^.^|{description}
     </entry>

@@ -40,7 +40,7 @@ public class FromCelestaToAsciidocGenerator implements AutoCloseable{
             String schemeName = entry.getKey();
             String schemeDoc = getDescription(entry.getValue().getCelestaDoc());
 
-            writer.write(String.format(scheme.getString("scheme"), schemeName, schemeDoc));
+            writer.write(String.format(scheme.getString("scheme"), schemeName, schemeName, schemeDoc));
             writer.newLine();
 
             Map<String, Table> tableMap = entry.getValue().getTables();
@@ -105,11 +105,12 @@ public class FromCelestaToAsciidocGenerator implements AutoCloseable{
                         StringBuilder keyField = new StringBuilder();
                         while (fkeysNamesIterator.hasNext() && pkeysNamesIterator.hasNext()) {
                             keyField.append('*').append(fkeysNamesIterator.next())
-                                    .append('*').append(":").append(pkeysNamesIterator.next()).append('\n');
+                                    .append('*').append(":")
+                                    .append(pkeysNamesIterator.next()).append('\n').append('\n');
                         }
                         String referencedCelestaIdentifier =
                                 String.format("celestareporter_t_%s_%s", schemeName, fk.getReferencedTable().getName());
-                        String schemeTableName = String.format("%s.%s", schemeName, fk.getParentTable().getName());
+                        String schemeTableName = String.format("%s.%s", schemeName, fk.getReferencedTable().getName());
 
                         writer.write(String.format(fkeyTable.getString("table"), keyField.toString(),
                                 referencedCelestaIdentifier, schemeTableName));
@@ -123,7 +124,7 @@ public class FromCelestaToAsciidocGenerator implements AutoCloseable{
                 writer.newLine();
 
             }
-            writer.write(scheme.getString("schemeEnd"));
+            writer.write(String.format(scheme.getString("schemeEnd"), schemeName));
             writer.newLine();
         }
     }

@@ -5,11 +5,11 @@
 //tag::generated_from_celesta_sql[]
 [discrete]
 == {scheme} {openq}%s{closeq}
-//tag::scheme_comment[]
+//tag::celestareporter_s_%s[]
 %s
-//end::scheme_comment[]
     </entry>
     <entry key="schemeEnd">
+//end::celestareporter_s_%s[]
 //end::generated_from_celesta_sql[]
     </entry>
 </properties>
