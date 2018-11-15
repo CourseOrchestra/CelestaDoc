@@ -5,7 +5,6 @@ import ru.curs.celestadoc.helper.XMLResourceBundleControl;
 import ru.curs.celestadoc.reader.CelestaSqlReader;
 
 import java.io.BufferedWriter;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -18,30 +17,45 @@ public class FromCelestaToAsciidocGenerator implements AutoCloseable{
     private final ResourceBundle scheme = ResourceBundle.getBundle("scheme", new XMLResourceBundleControl());
     private final ResourceBundle table = ResourceBundle.getBundle("table", new XMLResourceBundleControl());
     private final ResourceBundle fkeyTable = ResourceBundle.getBundle("fkey_table", new XMLResourceBundleControl());
+    private final ResourceBundle plantUml = ResourceBundle.getBundle("plantuml", new XMLResourceBundleControl());
     private final String regex = "(%s:)(.+)$";
 
     private final Pattern pattern;
     private final CelestaSqlReader celestaSqlReader;
-    private final BufferedWriter writer;
+    private final BufferedWriter writerAsciiDoc;
+    private final BufferedWriter writerPlantUml;
+    private final String params;
 
-    public FromCelestaToAsciidocGenerator(String celestaPath, String outputPath, String prefix)
+    public FromCelestaToAsciidocGenerator(String celestaPath, String outputPath, String prefix,
+                                          boolean isPlantUml, String params)
             throws ParseException, IOException {
         celestaSqlReader = new CelestaSqlReader(celestaPath);
-        writer = Files.newBufferedWriter(Paths.get(outputPath));
+        writerAsciiDoc = Files.newBufferedWriter(Paths.get(outputPath));
         pattern = Pattern.compile(String.format(regex, prefix));
+
+        if (isPlantUml) {
+            writerPlantUml = Files.newBufferedWriter(Paths.get(outputPath.replace(".adoc", ".pu")));
+            this.params = params;
+        } else {
+            writerPlantUml = null;
+            this.params = null;
+        }
     }
 
     public void generate() throws IOException {
-        writer.write(header.getString("header"));
-        writer.newLine();
+        writerAsciiDoc.write(header.getString("header"));
+        writerAsciiDoc.newLine();
+
+        writePlantUml(plantUml.getString("start"));
+        writePlantUml(String.format(plantUml.getString("include"), params));
 
         Map<String, Grain> grains = celestaSqlReader.getGrains();
         for (Map.Entry<String, Grain> entry : grains.entrySet()) {
             String schemeName = entry.getKey();
             String schemeDoc = getDescription(entry.getValue().getCelestaDoc());
 
-            writer.write(String.format(scheme.getString("scheme"), schemeName, schemeName, schemeDoc));
-            writer.newLine();
+            writerAsciiDoc.write(String.format(scheme.getString("scheme"), schemeName, schemeName, schemeDoc));
+            writerAsciiDoc.newLine();
 
             Map<String, Table> tableMap = entry.getValue().getTables();
             Map<Table, List<ForeignKey>> tableForeignKeyMap = getForeignKeys(tableMap);
@@ -50,51 +64,61 @@ public class FromCelestaToAsciidocGenerator implements AutoCloseable{
                 String celestaTableIdentifier = String.format("celestareporter_t_%s_%s", schemeName, tableName);
                 String tableDescription = getDescription(tableEntry.getValue().getCelestaDoc());
 
-                writer.write(String.format(
+                writerAsciiDoc.write(String.format(
                         table.getString("tableName"), celestaTableIdentifier, tableName, celestaTableIdentifier,
                         tableDescription));
-                writer.newLine();
+                writerAsciiDoc.newLine();
 
-                writer.write(table.getString("table"));
-                writer.newLine();
+                writerAsciiDoc.write(table.getString("table"));
+                writerAsciiDoc.newLine();
+
+                writePlantUml(String.format(plantUml.getString("classStart"),
+                        tableName, celestaTableIdentifier));
 
                 Map<String, Column> columnMap = tableEntry.getValue().getColumns();
                 Set<ForeignKey> foreignKeys = tableEntry.getValue().getForeignKeys();
                 for (Map.Entry<String, Column> columnEntry : columnMap.entrySet()) {
                     String field = columnEntry.getKey();
+                    String formatUmlField = plantUml.getString("field");
+
                     if (tableEntry.getValue().getPrimaryKey().containsKey(field)) {
                         field += table.getString("keyIcon");
+                        formatUmlField = plantUml.getString("key");
                     }
                     Column column = columnEntry.getValue();
 
                     String specification = getSpecification(column);
                     String description = getDescription(column.getCelestaDoc());
 
-                    writer.write(String.format(table.getString("row"), field, specification, description));
-                    writer.newLine();
+                    writerAsciiDoc.write(String.format(table.getString("row"), field, specification, description));
+                    writerAsciiDoc.newLine();
+
+                    writePlantUml(String.format(formatUmlField, columnEntry.getKey()));
                 }
-                writer.write(table.getString("tableEnd"));
-                writer.newLine();
+                writerAsciiDoc.write(table.getString("tableEnd"));
+                writerAsciiDoc.newLine();
+
+                writePlantUml(plantUml.getString("classEnd"));
 
                 if (tableForeignKeyMap.containsKey(tableEntry.getValue())) {
-                    writer.write(table.getString("isReference"));
-                    writer.newLine();
+                    writerAsciiDoc.write(table.getString("isReference"));
+                    writerAsciiDoc.newLine();
                     for (ForeignKey fk : tableForeignKeyMap.get(tableEntry.getValue())) {
                         String referencedCelestaIdentifier =
                                 String.format("celestareporter_t_%s_%s", schemeName, fk.getParentTable().getName());
                         String schemeTableName = String.format("%s.%s", schemeName, fk.getParentTable().getName());
-                        writer.write(String.format(
+                        writerAsciiDoc.write(String.format(
                                 table.getString("referencedTable"), referencedCelestaIdentifier, schemeTableName));
-                        writer.newLine();
+                        writerAsciiDoc.newLine();
                     }
-                    writer.write(table.getString("isReferenceEnd"));
-                    writer.newLine();
+                    writerAsciiDoc.write(table.getString("isReferenceEnd"));
+                    writerAsciiDoc.newLine();
                 }
 
                 if (!foreignKeys.isEmpty()) {
-                    writer.write(String.format(
+                    writerAsciiDoc.write(String.format(
                             fkeyTable.getString("fkeyTable"), celestaTableIdentifier));
-                    writer.newLine();
+                    writerAsciiDoc.newLine();
                     for (ForeignKey fk : foreignKeys) {
                         Set<String> fkeysNames = fk.getColumns().keySet();
                         Set<String> pkeysNames = fk.getReferencedTable().getPrimaryKey().keySet();
@@ -112,26 +136,41 @@ public class FromCelestaToAsciidocGenerator implements AutoCloseable{
                                 String.format("celestareporter_t_%s_%s", schemeName, fk.getReferencedTable().getName());
                         String schemeTableName = String.format("%s.%s", schemeName, fk.getReferencedTable().getName());
 
-                        writer.write(String.format(fkeyTable.getString("table"), keyField.toString(),
+                        writerAsciiDoc.write(String.format(fkeyTable.getString("table"), keyField.toString(),
                                 referencedCelestaIdentifier, schemeTableName));
+
+                        writePlantUml(String.format(plantUml.getString("reference"),
+                                tableName, fk.getReferencedTable().getName()));
                     }
-                    writer.write(String.format(
+                    writerAsciiDoc.write(String.format(
                             fkeyTable.getString("fkeyEnd"), celestaTableIdentifier));
-                    writer.newLine();
+                    writerAsciiDoc.newLine();
                 }
 
-                writer.write(String.format(table.getString("tableSectionEnd"), celestaTableIdentifier));
-                writer.newLine();
+                writerAsciiDoc.write(String.format(table.getString("tableSectionEnd"), celestaTableIdentifier));
+                writerAsciiDoc.newLine();
 
             }
-            writer.write(String.format(scheme.getString("schemeEnd"), schemeName));
-            writer.newLine();
+            writerAsciiDoc.write(String.format(scheme.getString("schemeEnd"), schemeName));
+            writerAsciiDoc.newLine();
+
+            writePlantUml(plantUml.getString("end"));
+        }
+    }
+
+    private void writePlantUml(String line) throws IOException {
+        if (writerPlantUml != null) {
+            writerPlantUml.write(line);
+            writerPlantUml.newLine();
         }
     }
 
     @Override
     public void close() throws Exception {
-        writer.close();
+        writerAsciiDoc.close();
+        if (writerPlantUml != null) {
+            writerPlantUml.close();
+        }
     }
 
     private String getDescription(String celestaDoc) {

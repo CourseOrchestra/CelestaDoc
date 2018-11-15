@@ -1,0 +1,16 @@
+hide circle
+hide empty members
+skinparam backgroundcolor transparent
+skinparam shadowing false
+skinparam dpi 200
+
+left to right direction
+
+skinparam Class {
+  BorderColor black
+  BackgroundColor white
+}
+skinparam Arrow {
+	Color black
+}
+skinparam IconPrivateColor black
