@@ -4,7 +4,8 @@ import ru.curs.celesta.score.AbstractScore;
 import ru.curs.celesta.score.Grain;
 import ru.curs.celesta.score.ParseException;
 import ru.curs.celesta.score.Score;
-import ru.curs.celesta.score.discovery.DefaultScoreDiscovery;
+import ru.curs.celesta.score.discovery.ScoreByScorePathDiscovery;
+import ru.curs.celesta.score.discovery.ScoreDiscovery;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -13,9 +14,9 @@ public class CelestaSqlReader {
     private final AbstractScore abstractScore;
 
     public CelestaSqlReader(String path) throws ParseException {
+        ScoreDiscovery discovery = new ScoreByScorePathDiscovery(path);
         abstractScore = new AbstractScore.ScoreBuilder(Score.class)
-                .path(path)
-                .scoreDiscovery(new DefaultScoreDiscovery())
+                .scoreDiscovery(discovery)
                 .build();
     }
 
