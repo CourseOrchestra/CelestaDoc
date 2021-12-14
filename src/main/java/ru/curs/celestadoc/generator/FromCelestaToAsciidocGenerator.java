@@ -57,9 +57,9 @@ public class FromCelestaToAsciidocGenerator implements AutoCloseable{
             writerAsciiDoc.write(String.format(scheme.getString("scheme"), schemeName, schemeName, schemeDoc));
             writerAsciiDoc.newLine();
 
-            Map<String, Table> tableMap = entry.getValue().getTables();
-            Map<Table, List<ForeignKey>> tableForeignKeyMap = getForeignKeys(tableMap);
-            for (Map.Entry<String, Table> tableEntry : tableMap.entrySet()) {
+            Map<String, BasicTable> tableMap = entry.getValue().getTables();
+            Map<BasicTable, List<ForeignKey>> tableForeignKeyMap = getForeignKeys(tableMap);
+            for (Map.Entry<String, BasicTable> tableEntry : tableMap.entrySet()) {
                 String tableName = tableEntry.getKey();
                 String celestaTableIdentifier = String.format("celestareporter_t_%s_%s", schemeName, tableName);
                 String tableDescription = getDescription(tableEntry.getValue().getCelestaDoc());
@@ -75,9 +75,9 @@ public class FromCelestaToAsciidocGenerator implements AutoCloseable{
                 writePlantUml(String.format(plantUml.getString("classStart"),
                         tableName, celestaTableIdentifier));
 
-                Map<String, Column> columnMap = tableEntry.getValue().getColumns();
+                Map<String, Column<?>> columnMap = tableEntry.getValue().getColumns();
                 Set<ForeignKey> foreignKeys = tableEntry.getValue().getForeignKeys();
-                for (Map.Entry<String, Column> columnEntry : columnMap.entrySet()) {
+                for (Map.Entry<String, Column<?>> columnEntry : columnMap.entrySet()) {
                     String field = columnEntry.getKey();
                     String formatUmlField = plantUml.getString("field");
 
@@ -85,7 +85,7 @@ public class FromCelestaToAsciidocGenerator implements AutoCloseable{
                         field += table.getString("keyIcon");
                         formatUmlField = plantUml.getString("key");
                     }
-                    Column column = columnEntry.getValue();
+                    Column<?> column = columnEntry.getValue();
 
                     String specification = getSpecification(column);
                     String description = getDescription(column.getCelestaDoc());
@@ -136,7 +136,7 @@ public class FromCelestaToAsciidocGenerator implements AutoCloseable{
                                 String.format("celestareporter_t_%s_%s", schemeName, fk.getReferencedTable().getName());
                         String schemeTableName = String.format("%s.%s", schemeName, fk.getReferencedTable().getName());
 
-                        writerAsciiDoc.write(String.format(fkeyTable.getString("table"), keyField.toString(),
+                        writerAsciiDoc.write(String.format(fkeyTable.getString("table"), keyField,
                                 referencedCelestaIdentifier, schemeTableName));
 
                         writePlantUml(String.format(plantUml.getString("reference"),
@@ -179,18 +179,26 @@ public class FromCelestaToAsciidocGenerator implements AutoCloseable{
         }
 
         for (String docLine : celestaDoc.split("\\r?\\n")) {
+            if ("(no-prefix:)(.+)$".equals(pattern.pattern()) && !"".equals(docLine.trim())) {
+                return docLine;
+            }
             Matcher matcher = pattern.matcher(docLine.trim());
             if (matcher.find()) {
-                return matcher.group(2).trim();
+                if (matcher.group(2).trim().equals("")) {
+                    return docLine;
+                } else {
+                    return matcher.group(2).trim();
+                }
+
             }
         }
         return "";
     }
 
-    private Map<Table, List<ForeignKey>> getForeignKeys(Map<String, Table> tableMap) {
-        Map<Table, List<ForeignKey>> result = new HashMap<>();
-        for (Map.Entry<String, Table> entry : tableMap.entrySet()) {
-            Table table = entry.getValue();
+    private Map<BasicTable, List<ForeignKey>> getForeignKeys(Map<String, BasicTable> tableMap) {
+        Map<BasicTable, List<ForeignKey>> result = new HashMap<>();
+        for (Map.Entry<String, BasicTable> entry : tableMap.entrySet()) {
+            BasicTable table = entry.getValue();
             for (ForeignKey fk : table.getForeignKeys()) {
                 if (result.containsKey(fk.getReferencedTable())) {
                     result.get(fk.getReferencedTable()).add(fk);
@@ -198,7 +206,6 @@ public class FromCelestaToAsciidocGenerator implements AutoCloseable{
                     List<ForeignKey> foreignKeys = new ArrayList<>();
                     foreignKeys.add(fk);
                     result.put(fk.getReferencedTable(), foreignKeys);
-
                 }
             }
         }
@@ -206,7 +213,7 @@ public class FromCelestaToAsciidocGenerator implements AutoCloseable{
         return result;
     }
 
-    private String getSpecification(Column column) {
+    private String getSpecification(Column<?> column) {
         String specification = column.getCelestaType();
         if (specification.equalsIgnoreCase("varchar")) {
             specification = String.format("%s(%d)", specification, ((StringColumn) column).getLength());
