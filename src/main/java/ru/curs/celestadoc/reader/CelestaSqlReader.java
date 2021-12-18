@@ -15,7 +15,7 @@ public class CelestaSqlReader {
 
     public CelestaSqlReader(String path) throws ParseException {
         ScoreDiscovery discovery = new ScoreByScorePathDiscovery(path);
-        abstractScore = new AbstractScore.ScoreBuilder(Score.class)
+        abstractScore = new AbstractScore.ScoreBuilder<>(Score.class)
                 .scoreDiscovery(discovery)
                 .build();
     }
