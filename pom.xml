@@ -5,8 +5,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>ru.curs</groupId>
-    <artifactId>CelestaDoc</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <artifactId>celestadoc</artifactId>
+    <version>1.01-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>CelestaDoc</name>
