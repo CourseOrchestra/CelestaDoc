@@ -52,7 +52,7 @@
         <asciidoctorj.version>1.5.6</asciidoctorj.version>
         <celesta.version>7.4.13</celesta.version>
 
-        <maven.assembly.plugin.version>3.1.0</maven.assembly.plugin.version>
+        <maven.assembly.plugin.version>3.3.0</maven.assembly.plugin.version>
         <maven.compiler.plugin.version>3.8.1</maven.compiler.plugin.version>
 
         <maven.surefire.plugin.version>2.22.2</maven.surefire.plugin.version>
