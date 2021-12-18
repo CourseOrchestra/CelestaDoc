@@ -1,3 +1,5 @@
+[![Actions Status: build](https://github.com/courseorchestra/celestadoc/workflows/build/badge.svg)](https://github.com/courseorchestra/celestadoc/actions?query=workflow%3A"build")
+
 = CelestaDoc
 
 Generates celesta documentation report.
