@@ -50,7 +50,7 @@
 
         <asciidoctor.pdf.version>1.6.0</asciidoctor.pdf.version>
         <asciidoctorj.version>1.5.6</asciidoctorj.version>
-        <celesta.version>7.4.15</celesta.version>
+        <celesta.version>7.4.27</celesta.version>
 
         <maven.assembly.plugin.version>3.3.0</maven.assembly.plugin.version>
         <maven.compiler.plugin.version>3.9.0</maven.compiler.plugin.version>
